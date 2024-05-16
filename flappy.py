@@ -3,14 +3,18 @@ import time
 import random
 
 pg.init()
+pg.display.set_caption("Flappy Bird")
+pg.font.init()
+
+font = pg.font.SysFont("mont.ttf", 80)
 
 def changeY():
     global playerY
     playerY -= 2
 
 #Settings
-winX = 800
-winY = 500
+winX = 500
+winY = 600
 FPS = 60
 
 #Dislay
@@ -29,12 +33,12 @@ score = 0
 
 def jump():
   global velo
-  velo = -12
+  velo = -10
 
 def fall():
   global velo
   global playerY
-  velo += 0.7
+  velo += 0.8
   playerY += velo
 
 game = True
@@ -52,13 +56,16 @@ class Point:
 pipes = []
 points = []
 
+bg = pg.image.load("bg.png")
+
 while game:
-    #Clock
-    pg.time.Clock().tick(FPS)
     display.fill("white")
 
+    display.blit(pg.transform.scale(bg, (600, 600)), (0,0))
+
     #Draw player
-    pg.draw.circle(display, "yellow", (50, playerY), 20)
+    bird = pg.image.load("bird.png").convert_alpha()
+    display.blit(pg.transform.scale(bird, (50, 40)), (50, playerY))
 
     #Get keys
     keys = pg.key.get_pressed()
@@ -89,18 +96,26 @@ while game:
         
     for p in points:
         p.x -= pipeSpeed
-        pg.draw.rect(display, "blue", (p.x, p.y, 50, 50))
         
     #Collision
     for pipe in pipes:
       if playerY > pipe.y and playerY < pipe.y + 300 and pipe.x < 60 and pipe.x > 40:
         game = False
+
+    if playerY >= winY or playerY <= -10:
+       game = False
         
     for p in points:
       if playerY > p.y - 50 and playerY < p.y + 100 and p.x < 60 and p.x > 40:
         score += 1
         points.pop(points.index(p))
-        
-    fall() 
-      
+    
+    #Score
+    scoreText = font.render(f"{score}", True, "white", None)
+    display.blit(scoreText, (winX // 2 - 20, 20))
+
+    fall()
+    
+    #Clock
+    pg.time.Clock().tick(FPS) 
     pg.display.update()
